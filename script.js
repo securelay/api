@@ -39,18 +39,25 @@ export async function key (ID, timeout = null) {
 }
 
 // Returns URL string.
-export async function publicUrl (key, ID, timeout = null) {
-  const endpointUrl = endpoint(ID)[0];
-  if (keyring.has(key)) return `${endpointUrl}/public/${keyring.get(key)}`;
-  const url = `${endpointUrl}/keys/${key}`;
-  const data = await fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
-    .then((response) => {
-      if (!response.ok) throw new Error(response.status);
-      return response.json();
-    });
-  if (!Object.hasOwn(data, 'public')) throw new Error(404);
-  return `${endpointUrl}/public/${data.public}`;
+function url (type) {
+  async function _ (key, ID, timeout = null) {
+    const endpointUrl = endpoint(ID)[0];
+    if (keyring.has(key)) return `${endpointUrl}/${type}/${type === 'private' ? key : keyring.get(key)}`;
+    const url = `${endpointUrl}/keys/${key}`;
+    const data = await fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      });
+    if (!Object.hasOwn(data, 'public')) throw new Error(404);
+    keyring.set(key, data.public); // store keys in keyring for future reference
+    return `${endpointUrl}/${type}/${type === 'private' ? key : data.public}`;
+  }
+  return _;
 }
+
+export const privateUrl = url('private');
+export const publicUrl = url('public');
 
 // Returns Javascript object obtained from parsing the response JSON.
 export async function sync (key, ID, webhook = null, timeout = null) {

@@ -7,6 +7,7 @@ console.log('endpoint_ID = ' + ID);
 const key = await securelay.key(ID);
 console.log('private key = ' + key);
 console.log('public URL for the above key = ' + await securelay.publicUrl(key, ID));
+console.log('private URL for the above key = ' + await securelay.privateUrl(key, ID));
 
 console.log('Lets take a sample key and a sample ID from the Securelay API documentation');
 const sampleKey = '3zTryeMxkq';
