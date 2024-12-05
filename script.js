@@ -1,7 +1,10 @@
 // Brief: Helper functions for accessing Securelay: https://securelay.github.io
-// Usage: All functions exported below are available for import. Import this module in your Javascript as -
+// Usage:
+//   All functions exported below are available for import.
+//   All exported functions, except the default, are asynchronous.
+//   Import this module in your Javascript as -
 //     import * as securelay from 'https://raw.githubusercontent.com/securelay/api/main/script.js'
-// Or from the CDN link: 'https://cdn.jsdelivr.net/gh/securelay/api@main/script.js'
+//   Or from the CDN link: 'https://cdn.jsdelivr.net/gh/securelay/api@main/script.js'
 //   Access the imported functions as -
 //     securelay.func()
 // Args: key and ID below respectively denote private key and endpoint ID.
