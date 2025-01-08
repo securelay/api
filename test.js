@@ -1,5 +1,7 @@
-import * as securelay from './script.js'; // 'https://raw.githubusercontent.com/securelay/api/main/script.js';
+import * as securelay from './script.js'; // 'https://securelay.github.io/api/script.js';
 import securelayUrl from './script.js'; // 'https://cdn.jsdelivr.net/gh/securelay/api@main/script.min.js';
+
+console.log('Version =', securelay.version);
 
 const [endpoint, ID] = securelayUrl();
 console.log('endpoint = ' + endpoint);

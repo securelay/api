@@ -3,12 +3,14 @@
 //   All functions exported below are available for import.
 //   All exported functions, except the default, are asynchronous.
 //   Import this module in your Javascript as -
-//     import * as securelay from 'https://raw.githubusercontent.com/securelay/api/main/script.js'
+//     import * as securelay from 'https://securelay.github.io/api/script.js'
 //   Or from the CDN link: 'https://cdn.jsdelivr.net/gh/securelay/api@main/script.js'
 //   Access the imported functions as -
 //     securelay.func()
 // Args: key and ID below respectively denote private key and endpoint ID.
-// Example: See test.js for usage example.
+// Example: See 'https://securelay.github.io/api/test.js' for usage example.
+
+export const version = '0.0.1';
 
 const endpoints = { alz2h: ['https://securelay.vercel.app'] };
 
