@@ -6,6 +6,7 @@ console.log('Version =', securelay.version);
 const [endpoint, ID] = securelayUrl();
 console.log('endpoint = ' + endpoint);
 console.log('endpoint_ID = ' + ID);
+console.log('OneSignal App ID for formonit =', await securelay.appId(ID, 'formonit'));
 const key = await securelay.key(ID);
 console.log('private key = ' + key);
 console.log('public URL for the above key = ' + await securelay.publicUrl(key, ID));

@@ -10,7 +10,7 @@
 // Args: key and ID below respectively denote private key and endpoint ID.
 // Example: See 'https://securelay.github.io/api/test.js' for usage example.
 
-export const version = '0.0.1';
+export const version = '0.0.2';
 
 const endpoints = { alz2h: ['https://securelay.vercel.app'] };
 
@@ -121,3 +121,14 @@ function publish (type) {
 export const pubForm = publish('formData'); // data type is FormData
 export const pubJson = publish('json'); // data type is {}
 export const pubText = publish('text'); // data type is text
+
+// Returns OneSignal App ID for web-push notifications for given endpointID and app
+export async function appId (ID, app, timeout = null) {
+  const endpointUrl = endpoint(ID)[0];
+  const url = `${endpointUrl}/id?app=${app}`;
+  return fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+    .then((response) => {
+      if (!response.ok) throw new Error(response.status);
+      return response.text();
+    });
+}
