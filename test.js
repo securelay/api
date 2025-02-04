@@ -17,43 +17,76 @@ const sampleKey = '3zTryeMxkq';
 const sampleID = 'alz2h';
 console.log('Sample private key = ' + sampleKey);
 console.log('Sample endpoint ID = ' + sampleID);
-const samplePublicUrl = await securelay.publicUrl(sampleKey, sampleID);
+const stdArgs = [sampleKey, sampleID];
+const samplePublicUrl = await securelay.publicUrl(...stdArgs);
 
 console.log('public URL for the sample = ' + samplePublicUrl);
 
 console.log('Trying publishing...');
-
+console.log('Testing pubJson() with field = "json":');
 try {
-  await securelay.pubJson(sampleKey + '/json', sampleID, { hello: 'world' });
+  await securelay.pubJson(...stdArgs, { hello: 'world' }, { field: 'json' });
   console.log('JSON publication successful. Retrieval link: ' + samplePublicUrl + '/json');
 } catch (err) {
   console.error('Error during publishing JSON\n' + err.message);
 }
-
+console.log('Testing pubForm() with field = "form":');
+const formData = new FormData();
+formData.append('hello', 'world');
 try {
-  await securelay.pubText(sampleKey, sampleID, 'hello world');
+  await securelay.pubForm(...stdArgs, formData, { field: 'form' });
+  console.log('Form publication successful. Retrieval link: ' + samplePublicUrl + '/form');
+} catch (err) {
+  console.error('Error during publishing form\n' + err.message);
+}
+console.log('Testing pubText():');
+try {
+  await securelay.pubText(...stdArgs, 'hello world');
   console.log('Text publication successful. Retrieval link: ' + samplePublicUrl);
 } catch (err) {
   console.error('Error during publishing text\n' + err.message);
 }
 
-const formData = new FormData();
-formData.append('hello', 'world');
+console.log('Renewing published content returns:');
 try {
-  await securelay.pubForm(sampleKey + '/form', sampleID, formData);
-  console.log('Form publication successful. Retrieval link: ' + samplePublicUrl + '/form');
+  console.log(JSON.stringify(await securelay.renew(sampleKey, sampleID)));
 } catch (err) {
-  console.error('Error during publishing form\n' + err.message);
+  console.error('Error during publishing text\n' + err.message);
 }
 
-console.log('Trying syncing. Should get [{"hello":"world"}]');
+console.log('Deleting published content...');
+try {
+  await securelay.unpublish(...stdArgs);
+} catch (err) {
+  console.error('Error during publishing text\n' + err.message);
+}
+
+console.log('Publishing, retrieving and deleting a secret ...');
+try {
+  const data = 'classified';
+  await securelay.pubText(...stdArgs, data, { password: 'someSecret' });
+  console.log('Published:', data);
+  console.log('Retrieved:', await fetch(samplePublicUrl + '?password=someSecret')
+    .then((response) => {
+      if (!response.ok) throw new Error(response.status);
+      return response.json();
+    })
+    .then((json) => json.data)
+  );
+  console.log('Deleting the data ...');
+  await securelay.unpublish(...stdArgs, { secret: true });
+} catch (err) {
+  console.error('Error with password protected publication text\n' + err.message);
+}
+
+console.log('Trying syncing after a public post. Should get [{"hello":"world"}]');
 try {
   await fetch(samplePublicUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ hello: 'world' })
   });
-  console.log(JSON.stringify(await securelay.sync(sampleKey, sampleID)));
+  console.log(JSON.stringify(await securelay.sync(...stdArgs)));
 } catch (err) {
   console.error('Error during syncing\n' + err.message);
 }

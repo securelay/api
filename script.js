@@ -1,6 +1,6 @@
 // Brief: Helper functions for accessing Securelay: https://securelay.github.io
 // Usage:
-//   All functions exported below are available for import.
+//   All functions exported below constitute the API/library.
 //   All exported functions, except the default, are asynchronous.
 //   Import this module in your Javascript as -
 //     import * as securelay from 'https://securelay.github.io/api/script.js'
@@ -22,8 +22,10 @@ function randElement (array) {
   return array[randomIdx];
 }
 
-// Retruns a URL string.
-// Default export. May be imported as: `import securelayUrl from 'https://raw.githubusercontent.com/securelay/api/main/script.js'`
+// Returns the array containing two string elements: [ <URL of a Securelay server> , <its endpoint ID> ]
+// Optionally, pass your chosen endpoint ID as argument.
+// Note: This is the default export.
+// May also be imported as: `import securelayUrl from 'https://raw.githubusercontent.com/securelay/api/main/script.js'`
 export default function endpoint (ID = null) {
   const endpointID = ID ?? randElement(Object.keys(endpoints));
   if (!Object.hasOwn(endpoints, endpointID)) throw new Error(404);
@@ -31,10 +33,13 @@ export default function endpoint (ID = null) {
 }
 
 // Returns a new private key.
-export async function key (ID, timeout = null) {
+// options = { timeout: <milliseconds> }
+export async function key (ID, options = {}) {
   const endpointUrl = endpoint(ID)[0];
   const url = `${endpointUrl}/keys`;
-  const data = await fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+  const opts = {};
+  if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+  const data = await fetch(url, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
       return response.json();
@@ -45,11 +50,14 @@ export async function key (ID, timeout = null) {
 
 // Returns URL string.
 function url (type) {
-  async function _ (key, ID, timeout = null) {
+  // options = { timeout: <milliseconds> }
+  async function _ (key, ID, options = {}) {
     const endpointUrl = endpoint(ID)[0];
     if (keyring.has(key)) return `${endpointUrl}/${type}/${type === 'private' ? key : keyring.get(key)}`;
     const url = `${endpointUrl}/keys/${key}`;
-    const data = await fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+    const opts = {};
+    if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+    const data = await fetch(url, opts)
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         return response.json();
@@ -61,16 +69,22 @@ function url (type) {
   return _;
 }
 
+// Returns URL string.
+// args: key, ID, options
+// options = { timeout: <milliseconds> }
 export const privateUrl = url('private');
 export const publicUrl = url('public');
 
 // Returns Javascript object obtained from parsing the response JSON.
-export async function sync (key, ID, webhook = null, timeout = null) {
+// options = { webhook: <urlString>, timeout: <milliseconds> }
+export async function sync (key, ID, options = {}) {
   const endpointUrl = endpoint(ID)[0];
   let query = '';
-  if (webhook) query = `?hook=${encodeURIComponent(webhook)}`;
+  if (options.webhook) query = `?hook=${encodeURIComponent(options.webhook)}`;
   const url = `${endpointUrl}/private/${key}${query}`;
-  return fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+  const opts = {};
+  if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+  return fetch(url, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
       return response.json();
@@ -97,18 +111,21 @@ function publish (type) {
       break;
   }
 
-  async function publisher (key, ID, data, passwd = null, timeout = null) {
+  // options = { field: <string>, password: <string>, timeout: <milliseconds> }
+  async function publisher (key, ID, data, options = {}) {
     const endpointUrl = endpoint(ID)[0];
-    const url = `${endpointUrl}/private/${key}`;
+    const field = options.field ? `/${options.field}` : '';
+    const url = `${endpointUrl}/private/${key}${field}`;
     const payload = encode(data);
     let query = '';
-    if (passwd != null) query = `?password=${passwd}`;
-    return fetch(url + query, {
+    if (options.password) query = `?password=${options.password}`;
+    const opts = {
       method: 'POST',
       headers,
-      body: payload,
-      signal: timeout ? AbortSignal.timeout(timeout) : null
-    })
+      body: payload
+    };
+    if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+    return fetch(url + query, opts)
       .then((response) => {
         if (!response.ok) throw new Error(response.status);
         return response.json();
@@ -118,38 +135,39 @@ function publish (type) {
   return publisher;
 }
 
-// Args: key, ID, data, passwd = null, timeout = null
+// args: key, ID, data, options
+// options = { field: <string>, password: <string>, timeout: <milliseconds> }
 // Returns: Javascript object obtained from parsing the response JSON.
 export const pubForm = publish('formData'); // data type is FormData
 export const pubJson = publish('json'); // data type is {}
 export const pubText = publish('text'); // data type is text
 
 // Unpublish previously published data.
-// Default: unpublishes from CDN. Use truthy value for `secret` parameter to unpublish password protected content 
-export async function unpublish (key, ID, secret = false) {
+// Default: unpublishes from CDN. Use truthy value for `secret` property to unpublish password protected content
+// options = { secret: <Boolean>, timeout: <milliseconds> }
+export async function unpublish (key, ID, options = {}) {
   const endpointUrl = endpoint(ID)[0];
   const url = `${endpointUrl}/private/${key}`;
-  const query = secret ? '?password' : '';
-  return fetch(url + query, {
-    method: 'DELETE',
-    signal: timeout ? AbortSignal.timeout(timeout) : null
-  })
+  const query = options.secret ? '?password' : '';
+  const opts = { method: 'DELETE' };
+  if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+  return fetch(url + query, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
     });
 }
 
 // Renew (to extend expiry) previously published data.
-// Default: renews CDN. Use truthy value for `secret` parameter to renew password protected content
+// Default: renews CDN. Use truthy value for `secret` property to renew password protected content
 // Returns: Javascript object obtained from parsing the response JSON.
-export async function renew (key, ID, secret = false) {
+// options = { secret: <Boolean>, timeout: <milliseconds> }
+export async function renew (key, ID, options = {}) {
   const endpointUrl = endpoint(ID)[0];
   const url = `${endpointUrl}/private/${key}`;
-  const query = secret ? '?password' : '';
-  return fetch(url + query, {
-    method: 'PATCH',
-    signal: timeout ? AbortSignal.timeout(timeout) : null
-  })
+  const query = options.secret ? '?password' : '';
+  const opts = { method: 'PATCH' };
+  if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+  return fetch(url + query, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
       return response.json();
@@ -157,10 +175,13 @@ export async function renew (key, ID, secret = false) {
 }
 
 // Returns OneSignal App ID for web-push notifications for given endpointID and app
-export async function appId (ID, app, timeout = null) {
+// options = { timeout: <milliseconds> }
+export async function appId (ID, app, options = {}) {
   const endpointUrl = endpoint(ID)[0];
   const url = `${endpointUrl}/id?app=${app}`;
-  return fetch(url, { signal: timeout ? AbortSignal.timeout(timeout) : null })
+  const opts = {};
+  if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
+  return fetch(url, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
       return response.text();
