@@ -10,7 +10,7 @@
 // Args: key and ID below respectively denote private key and endpoint ID.
 // Example: See 'https://securelay.github.io/api/test.js' for usage example.
 
-export const version = '0.0.2';
+export const version = '0.0.3';
 
 const endpoints = { alz2h: ['https://securelay.vercel.app'] };
 
@@ -97,11 +97,13 @@ function publish (type) {
       break;
   }
 
-  async function publisher (key, ID, data, timeout = null) {
+  async function publisher (key, ID, data, passwd = null, timeout = null) {
     const endpointUrl = endpoint(ID)[0];
     const url = `${endpointUrl}/private/${key}`;
     const payload = encode(data);
-    return fetch(url, {
+    let query = '';
+    if (passwd != null) query = `?password=${passwd}`;
+    return fetch(url + query, {
       method: 'POST',
       headers,
       body: payload,
@@ -116,11 +118,43 @@ function publish (type) {
   return publisher;
 }
 
-// Args: key, ID, data, timeout = null
+// Args: key, ID, data, passwd = null, timeout = null
 // Returns: Javascript object obtained from parsing the response JSON.
 export const pubForm = publish('formData'); // data type is FormData
 export const pubJson = publish('json'); // data type is {}
 export const pubText = publish('text'); // data type is text
+
+// Unpublish previously published data.
+// Default: unpublishes from CDN. Use truthy value for `secret` parameter to unpublish password protected content 
+export async function unpublish (key, ID, secret = false) {
+  const endpointUrl = endpoint(ID)[0];
+  const url = `${endpointUrl}/private/${key}`;
+  const query = secret ? '?password' : '';
+  return fetch(url + query, {
+    method: 'DELETE',
+    signal: timeout ? AbortSignal.timeout(timeout) : null
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error(response.status);
+    });
+}
+
+// Renew (to extend expiry) previously published data.
+// Default: renews CDN. Use truthy value for `secret` parameter to renew password protected content
+// Returns: Javascript object obtained from parsing the response JSON.
+export async function renew (key, ID, secret = false) {
+  const endpointUrl = endpoint(ID)[0];
+  const url = `${endpointUrl}/private/${key}`;
+  const query = secret ? '?password' : '';
+  return fetch(url + query, {
+    method: 'PATCH',
+    signal: timeout ? AbortSignal.timeout(timeout) : null
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error(response.status);
+      return response.json();
+    });
+}
 
 // Returns OneSignal App ID for web-push notifications for given endpointID and app
 export async function appId (ID, app, timeout = null) {
