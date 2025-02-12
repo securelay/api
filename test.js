@@ -13,7 +13,7 @@ console.log('public URL for the above key = ' + await securelay.publicUrl(key, I
 console.log('private URL for the above key = ' + await securelay.privateUrl(key, ID));
 
 console.log('Lets take a sample key and a sample ID from the Securelay API documentation');
-const sampleKey = '3zTryeMxkq';
+const sampleKey = 'A3zTryeMxkq';
 const sampleID = 'alz2h';
 console.log('Sample private key = ' + sampleKey);
 console.log('Sample endpoint ID = ' + sampleID);
