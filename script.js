@@ -10,7 +10,7 @@
 // Args: key and ID below respectively denote private key and endpoint ID.
 // Example: See 'https://securelay.github.io/api/test.js' for usage example.
 
-export const version = '0.0.3';
+export const version = '0.0.4';
 
 const endpoints = { alz2h: ['https://securelay.vercel.app'] };
 
@@ -178,12 +178,15 @@ export async function renew (key, ID, options = {}) {
 // options = { timeout: <milliseconds> }
 export async function appId (ID, app, options = {}) {
   const endpointUrl = endpoint(ID)[0];
-  const url = `${endpointUrl}/id?app=${app}`;
+  const url = `${endpointUrl}/properties`;
   const opts = {};
   if (options.timeout) opts.signal = AbortSignal.timeout(options.timeout);
   return fetch(url, opts)
     .then((response) => {
       if (!response.ok) throw new Error(response.status);
-      return response.text();
+      return response.json();
+    })
+    .then((obj) => {
+      return obj.OneSignalAppId[app.toLowerCase()];
     });
 }
