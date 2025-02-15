@@ -10,9 +10,10 @@
 // Args: key and ID below respectively denote private key and endpoint ID.
 // Example: See 'https://securelay.github.io/api/test.js' for usage example.
 
-export const version = '0.0.4';
+export const version = '0.0.5';
 
-const endpoints = { alz2h: ['https://securelay.vercel.app'] };
+const endpoints = await fetch(`https://cdn.jsdelivr.net/gh/securelay/api@v${version}/endpoints.json`)
+  .then((response) => response.json());
 
 const keyring = new Map();
 
