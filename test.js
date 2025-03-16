@@ -12,12 +12,7 @@ console.log('private key = ' + key);
 console.log('public URL for the above key = ' + await securelay.publicUrl(key, ID));
 console.log('private URL for the above key = ' + await securelay.privateUrl(key, ID));
 
-console.log('Lets take a sample key and a sample ID from the Securelay API documentation');
-const sampleKey = 'A3zTryeMxkq';
-const sampleID = 'alz2h';
-console.log('Sample private key = ' + sampleKey);
-console.log('Sample endpoint ID = ' + sampleID);
-const stdArgs = [sampleKey, sampleID];
+const stdArgs = [key, ID];
 const samplePublicUrl = await securelay.publicUrl(...stdArgs);
 
 console.log('public URL for the sample = ' + samplePublicUrl);
@@ -49,7 +44,7 @@ try {
 
 console.log('Renewing published content returns:');
 try {
-  console.log(JSON.stringify(await securelay.renew(sampleKey, sampleID)));
+  console.log(JSON.stringify(await securelay.renew(...stdArgs)));
 } catch (err) {
   console.error('Error during publishing text\n' + err.message);
 }
