@@ -9,7 +9,7 @@ Read the comments within [script.js](script.js).
 
 - For browsers
 ```html
-<script type=module src="https://cdn.jsdelivr.net/gh/securelay/api@main/script.js">
+<script type=module src="https://cdn.jsdelivr.net/gh/securelay/api@main/script.min.js">
 </script>
 ```
 
