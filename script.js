@@ -11,8 +11,9 @@
 // Example: See 'https://securelay.github.io/api/test.js' for usage example.
 
 import endpoints from './endpoints.json' with { type: 'json' };
+import packageInfo from './package.json' with { type: 'json' };
 
-export const version = '0.0.5';
+export const version = packageInfo.version;
 
 const keyring = new Map();
 

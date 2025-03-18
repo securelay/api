@@ -1,6 +1,10 @@
 {
+  "name": "securelay-sdk-js",
+  "version": "0.0.6",
+  "main": "./script.js",
   "type": "module",
   "scripts": {
-    "test": "semistandard --fix; node test.js"
+    "test": "node ./test.js",
+    "lint": "semistandard --fix"
   }
 }
