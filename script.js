@@ -13,8 +13,8 @@
 // :-( The following beautiful JSON imports are commented only because Firefox doesn't support them yet
 // Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import/with#browser_compatibility
 // Once import attributes are supported by Firefox, remove the ugly re-definitions of `endpoints` and `packageInfo` below
-const endpoints = {"alz2h":["https://securelay.vercel.app"]};
-const packageInfo = {"version": "0.0.7"};
+const endpoints = {"Xyr-s":["https://securelay.vercel.app"]};
+const packageInfo = {"version": "0.0.8"};
 //import endpoints from './endpoints.json' with { type: 'json' };
 //import packageInfo from './package.json' with { type: 'json' };
 
